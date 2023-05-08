@@ -1,0 +1,72 @@
+---
+# This playbook initialize the Raspberry Pi and transforms it into a router (on a stick) using nftables
+
+- name: Transforming the Raspberry Pi into a router
+  hosts: raspberrypi
+  become: true
+  tasks:
+  - name: Upgrade dist
+    apt:
+      upgrade: dist
+
+  - name: Update package cache, upgrade, install VLAN package and dependencies
+    apt:
+      update_cache: yes
+      upgrade: yes
+      autoremove: yes
+
+  - name: Install VLAN package and dependencies
+    apt:
+      name: vlan
+      state: present
+
+  - name: Prevent host from getting an IPv4 from DHCP (because we're going to use a static IP)
+    service:
+      name: dhcpcd
+      enabled: no
+
+  - name: Enable 8021q kernel module and make it persistent across reboots
+    lineinfile:
+      path: /etc/modules
+      line: "8021q"
+
+  - name: Allow IPv4 forwarding, disable ARP filtering, disable Reverse Path Filtering
+    lineinfile:
+      dest: /etc/sysctl.conf
+      line: "{{ item }}"
+    with_items:
+      - "net.ipv4.ip_forward=1"
+      - "net.ipv4.conf.all.arp_filter=0"
+      - "net.ipv4.conf.all.rp_filter=2"
+
+  - name: Checking if nftables is installed and enabled
+    apt:
+      name: nftables
+      state: present
+      update_cache: yes
+
+  - name: Checking if nftables service is enabled
+    service:
+      name: nftables
+      enabled: yes
+
+  - name: Overwrite the nftables config file
+    template:
+      src: nftables.conf.j2
+      dest: /etc/nftables.conf
+
+  - name: Overwrite the network config file
+    template:
+      src: interfaces.j2
+      dest: /etc/network/interfaces
+
+  - name: Reboot to apply changes
+    shell: reboot
+    args:
+      executable: /bin/bash
+    ignore_unreachable: true
+    ignore_errors: true
+
+  - name: Done!
+    debug:
+      msg: "The router should be ready! Now wait a few minutes and connect back to your Raspberry Pi at {{ my_home_ip_address }} or {{ my_vlan_ip_address }}. Please leave me your suggestions on the GitHub repository, thanks! ;) https://github.com/AngeIo/rpi-router-ansible"

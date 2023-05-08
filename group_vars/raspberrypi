@@ -1,0 +1,21 @@
+---
+# You can change these values to match your environment and your needs
+
+# Name of the only network interface on the Raspberry Pi
+my_interface: eth0
+
+# Home network related variables
+my_home_network: 192.168.1.0/24
+my_home_ip_address: 192.168.1.4
+my_home_netmask_long: 255.255.255.0
+my_home_netmask_short: 24
+my_home_gateway: 192.168.1.1
+my_home_dns1: 192.168.1.3
+my_home_dns2: 1.1.1.1
+
+# VLAN related variables
+my_vlan_id: 5
+my_vlan_network: 10.5.0.0/16
+my_vlan_ip_address: 10.5.0.1
+my_vlan_netmask_long: 255.255.0.0
+my_vlan_netmask_short: 16

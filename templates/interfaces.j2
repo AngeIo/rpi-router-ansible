@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+
+# interfaces(5) file used by ifup(8) and ifdown(8)
+# Include files from /etc/network/interfaces.d:
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The first VLAN (default) using {{ my_interface }}
+auto {{ my_interface }}
+iface {{ my_interface }} inet static
+    address {{ my_home_ip_address }}/{{ my_home_netmask_short }}
+    gateway {{ my_home_gateway }}
+    dns-nameservers {{ my_home_dns1 }} {{ my_home_dns2 }}
+
+# The second VLAN interface
+auto {{ my_interface }}.{{ my_vlan_id }}
+iface {{ my_interface }}.{{ my_vlan_id }} inet static
+    address {{ my_vlan_ip_address }}/{{ my_vlan_netmask_short }}
+    #vlan-raw-device {{ my_interface }}
